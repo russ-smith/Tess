@@ -1,4 +1,4 @@
-#version 440 core
+#version 330 core
 
 layout (binding = 0, std140) uniform transform{
 	mat4 vp;
@@ -7,10 +7,6 @@ layout (binding = 0, std140) uniform transform{
 layout (binding = 1, std140) uniform rotation{
 	vec4 angles;
 };
-
-//layout (binding = 2, std140) uniform verts {
-//	vec4 points[64];
-//};
 
 layout (location = 0) in vec4 a;
 layout (location = 1) in vec4 b;
@@ -32,8 +28,8 @@ void main(){
 	float scaleB = 2./ -(B.w - 5);
 	A.xyz *= scaleA;
 	B.xyz *= scaleB;
-	scaleA *= .25;
-	scaleB *= .25;
+	scaleA *= .15;
+	scaleB *= .15;
 	vec3 Z = B.xyz - A.xyz;
 	vec3 X = cross(vec3(0, 0, 1), Z);
 	if (dot(X,X) < 0.01) 
