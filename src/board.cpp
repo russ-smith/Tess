@@ -2,15 +2,15 @@
 #include "geometry.h"
 #include <iostream>
 #include <cmath>
+#include <cstdlib>
 
 #define HALF_PI 1.57079632679
 
-#define ROT_XZ 1
-#define ROT_YW 2
-#define MOVE_TILES 4
-
-Board::Board() {
-
+Board::Board(double time) {
+	currTime = time;
+	unsigned int* seedptr = reinterpret_cast<unsigned int*>(&time);
+	srand(seedptr[0] ^ seedptr[1]);
+	addTile();
 }
 
 void Board::beginRotateXZ(int dir) {
@@ -94,13 +94,38 @@ void Board::update() {
 		double t = (currTime - moveStartTime) * 2;
 		//TODO TILE LOGIC
 	}
+
+	else if (updateFlags & GROW) {
+		double t = (currTime - growStartTime) * 3;
+		if (t >= 1) {
+			t = 1;
+			updateFlags ^= GROW;
+		}
+		else {
+			t *= (2 - t);
+		}
+		scales[newTile] = t;
+	}
 }
 
 void Board::reset() {
 }
 
 void Board::addTile() {
-
+	int freeTiles[16];
+	int numFree = 0;
+	for (size_t i = 0; i < 16; i++) {
+		if (values[i] == 0) {
+			freeTiles[numFree] = i;
+			numFree++;
+		}
+	}
+	int tileIndex = rand() % numFree;
+	values[tileIndex] = (rand() % 10) == 9 ? 2 : 1;
+	scales[tileIndex] = 0.f;
+	newTile = tileIndex;
+	growStartTime = currTime;
+	updateFlags |= GROW;
 }
 
 void Board::resetTile(int index) {

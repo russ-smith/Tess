@@ -13,9 +13,10 @@ private:
 	GLuint sphereVertBuffer, sphereIndexBuffer;
 	GLuint guiVertBuffer, guiIndexBuffer;
 	GLuint cornerInstanceBuffer, edgeInstanceBuffer;
-	GLuint edgeUniformBuffer, matrixUniformBuffer, angleUniformBuffer;
-	GLuint cornerShader, guiShader, edgeShader;
-	GLuint cornerVAO, guiVAO, edgeVAO;
+	GLuint tilePosInstanceBuffer, tileScaleInstanceBuffer, tileValueInstanceBuffer;
+	GLuint matrixUniformBuffer, angleUniformBuffer;
+	GLuint cornerShader, guiShader, edgeShader, tileShader;
+	GLuint cornerVAO, guiVAO, edgeVAO, tileVAO;
 	int width, height;
 	Board* pBoard;
 };

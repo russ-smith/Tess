@@ -18,7 +18,7 @@ void App::run() {
 	glfwSetMouseButtonCallback(pWindow, mouseButtonCB);
 	glfwMakeContextCurrent(pWindow);
 	glfwSwapInterval(1);
-	pBoard = new Board();
+	pBoard = new Board(glfwGetTime());
 	pGUI = new GUI(width, height, pBoard);
 	pRenderer = new Renderer(width, height, pBoard);
 	pRenderer->init();

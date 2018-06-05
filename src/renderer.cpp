@@ -21,14 +21,15 @@ void Renderer::init() {
 	glBindBuffer(GL_ARRAY_BUFFER, sphereVertBuffer);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(geometry::sphereVerts), geometry::sphereVerts, GL_STATIC_DRAW);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), 0);
-	glEnableVertexAttribArray(0);
 	glBindBuffer(GL_ARRAY_BUFFER, cornerInstanceBuffer);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(geometry::corners), geometry::corners, GL_STATIC_DRAW);
 	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), 0);
 	glVertexAttribDivisor(1, 1);
+	glEnableVertexAttribArray(0);
+	glEnableVertexAttribArray(1);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, sphereIndexBuffer);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(geometry::sphereTris), geometry::sphereTris, GL_STATIC_DRAW);
-	glEnableVertexAttribArray(1);
+
 
 	//setup gui
 	glGenBuffers(1, &guiVertBuffer);
@@ -51,10 +52,10 @@ void Renderer::init() {
 			}
 		}
 	}
-	glGenBuffers(1, &edgeUniformBuffer);
+	glGenBuffers(1, &edgeInstanceBuffer);
 	glGenVertexArrays(1, &edgeVAO);
 	glBindVertexArray(edgeVAO);
-	glBindBuffer(GL_ARRAY_BUFFER, edgeUniformBuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, edgeInstanceBuffer);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(edgeEnds), edgeEnds, GL_STATIC_DRAW);
 	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), 0);
 	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), reinterpret_cast<void*>(4 * sizeof(GLfloat)));
@@ -63,14 +64,41 @@ void Renderer::init() {
 	glEnableVertexAttribArray(0);
 	glEnableVertexAttribArray(1);
 
+	//setup tiles
+	glGenBuffers(1, &tilePosInstanceBuffer);
+	glGenBuffers(1, &tileScaleInstanceBuffer);
+	glGenBuffers(1, &tileValueInstanceBuffer);
+	glGenVertexArrays(1, &tileVAO);
+	glBindVertexArray(tileVAO);
+	glBindBuffer(GL_ARRAY_BUFFER, sphereVertBuffer);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), 0);
+	glBindBuffer(GL_ARRAY_BUFFER, tilePosInstanceBuffer);
+	glBufferData(GL_ARRAY_BUFFER, 64 * sizeof(GLfloat), nullptr, GL_DYNAMIC_DRAW);
+	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), 0);
+	glVertexAttribDivisor(1, 1);
+	glBindBuffer(GL_ARRAY_BUFFER, tileScaleInstanceBuffer);
+	glBufferData(GL_ARRAY_BUFFER, 16 * sizeof(GLfloat), nullptr, GL_DYNAMIC_DRAW);
+	glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, sizeof(GLfloat), 0);
+	glVertexAttribDivisor(2, 1);
+	glBindBuffer(GL_ARRAY_BUFFER, tileScaleInstanceBuffer);
+	glBufferData(GL_ARRAY_BUFFER, 16 * sizeof(GLfloat), nullptr, GL_DYNAMIC_DRAW);
+	glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, sizeof(GLfloat), 0);
+	glVertexAttribDivisor(3, 1);
+	glEnableVertexAttribArray(0);
+	glEnableVertexAttribArray(1);
+	glEnableVertexAttribArray(2);
+	glEnableVertexAttribArray(3);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, sphereIndexBuffer);
+
 	//compile shaders
 	cornerShader = loadShader("corner.vert", "board.frag");
 	guiShader = loadShader("gui.vert", "gui.frag");
 	edgeShader = loadShader("edge.vert", "board.frag");
+	tileShader = loadShader("tile.vert", "gui.frag");
 
 	//setup view-projection and rotation
-	glm::quat rot{ glm::vec3{ 0,1.05,0 } };
-	glm::vec3 camPos = rot * glm::vec3{ 0,6.5,5 };
+	glm::quat rot{ glm::vec3{ 0,0.55,0 } };
+	glm::vec3 camPos = rot * glm::vec3{ 0,6.3,5 };
 	glm::mat4 VP = glm::perspective(0.8f, 1.f, 1.f, 19.f) * glm::lookAt(camPos, glm::vec3{ 0.f,0.f,0.f }, glm::vec3{ 0.f,1.f,0.f });
 
 	glGenBuffers(1, &matrixUniformBuffer);
@@ -101,6 +129,32 @@ void Renderer::draw(double time) {
 	glBindVertexArray(edgeVAO);
 	glUseProgram(edgeShader);
 	glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 34, 32);
+
+	//draw tiles
+	GLfloat scales[16];
+	GLfloat values[16];
+	GLfloat positions[64];
+	int numTiles = 0;
+	for (size_t i = 0; i < 16; i++) {
+		if (pBoard->values[i]) {
+			values[numTiles] = pBoard->values[i];
+			scales[numTiles] = pBoard->scales[i];
+			for (size_t j = 0; j < 4; j++) {
+				positions[4 * numTiles + j] = geometry::corners[4 * i + j];
+			}
+			numTiles++;
+		}
+	}
+
+	glBindBuffer(GL_ARRAY_BUFFER, tilePosInstanceBuffer);
+	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(positions), positions);
+	glBindBuffer(GL_ARRAY_BUFFER, tileScaleInstanceBuffer);
+	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(scales), scales);
+	glBindBuffer(GL_ARRAY_BUFFER, tileValueInstanceBuffer);
+	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(values), values);
+	glBindVertexArray(tileVAO);
+	glUseProgram(tileShader);
+	glDrawElementsInstanced(GL_TRIANGLES, 240, GL_UNSIGNED_BYTE, 0, numTiles);
 
 	//draw gui
 	glViewport(0, 0, width, height);
