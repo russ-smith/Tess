@@ -4,6 +4,7 @@
 #include <cmath>
 #include <cstdlib>
 
+
 #define HALF_PI 1.57079632679
 
 Board::Board(double time) {
@@ -36,22 +37,23 @@ void Board::beginMoveTiles(int dir){
 	int s = 1 - e;
 
 	std::cout << "AXIS: " << dirArray << "   START: " << s << '\n';
-	////check for possible movements along dir 
-	//for (size_t i = 0; i < 16; i+=2) {
-	//	int start = geometry::edges[dirArray][i + s];
-	//	int end = geometry::edges[dirArray][i + e];
-	//	if (values[start]) {
-	//		if (values[end]==values[start] || values[end] == 0) {
-	//			targets[start] = end;
-	//			isMerging[start] = values[end];
-	//			moveNum++;
-	//		}
-	//	} 
-	//}
-	//if (moveNum) {
-	//	updateFlags |= MOVE_TILES;
-	//	moveStartTime = currTime;
-	//}
+	//check for possible movements along dir 
+	for (size_t i = 0; i < 16; i+=2) {
+		int start = geometry::edges[dirArray][i + s];
+		int end = geometry::edges[dirArray][i + e];
+		if (values[start]) {
+			std::cout << "start " << start << "  end " << end << '\n';
+			if (values[end]==values[start] || values[end] == 0) {
+				targets[start] = end;
+				isMerging[start] = (values[end] > 0);
+				moveNum++;
+			}
+		} 
+	}
+	if (moveNum) {
+		updateFlags |= MOVE_TILES;
+		moveStartTime = currTime;
+	}
 }
 
 void Board::update() {
@@ -92,7 +94,47 @@ void Board::update() {
 	//do tile movement
 	else if (updateFlags & MOVE_TILES) {
 		double t = (currTime - moveStartTime) * 2;
-		//TODO TILE LOGIC
+		if (t >= 1) {
+			for (size_t i = 0; i < 16; i++) {
+				if (values[i] > 0 && targets[i] != -1) {
+					if (isMerging[i]) {
+						values[targets[i]]++;
+						isMerging[i] = false;
+					}
+					else {
+						values[targets[i]] = values[i];
+						scales[targets[i]] = 1;
+					}
+					values[i] = 0;
+					targets[i] = -1;
+				}
+			}
+			addTile();
+			updateFlags ^= MOVE_TILES;
+		}
+		else 
+			t = t * t * (3 - 2 * t);
+
+		int tileNum = 0;
+		for (size_t i = 0; i < 16; i++) {
+			if (values[i]) {
+				drawValues[tileNum] = values[i];
+				drawScales[tileNum] = scales[i];
+				if (targets[i] != -1) {
+					for (size_t j = 0; j < 4; j++) {
+						drawPositions[4 * tileNum + j] = geometry::corners[4 * i + j] * (1 - t)
+														+geometry::corners[4 * targets[i] + j] * t;
+					}
+				}
+				else {
+					for (size_t j = 0; j < 4; j++) {
+						drawPositions[4 * tileNum + j] = geometry::corners[4 * i + j];
+					}
+				}
+				tileNum++;
+			}
+		}
+		numActive = tileNum;
 	}
 
 	else if (updateFlags & GROW) {
@@ -105,7 +147,21 @@ void Board::update() {
 			t *= (2 - t);
 		}
 		scales[newTile] = t;
+		int tileNum = 0;
+		for (size_t i = 0; i < 16; i++) {
+			if (values[i]) {
+				drawValues[tileNum] = values[i];
+				drawScales[tileNum] = scales[i];
+				for (size_t j = 0; j < 4; j++) {
+					drawPositions[4 * tileNum + j] = geometry::corners[4 * i + j];
+				}
+				tileNum++;
+			}
+		}
+		numActive = tileNum;
 	}
+	
+	
 }
 
 void Board::reset() {
@@ -120,9 +176,10 @@ void Board::addTile() {
 			numFree++;
 		}
 	}
-	int tileIndex = rand() % numFree;
+	int tileIndex = freeTiles[rand() % numFree];
 	values[tileIndex] = (rand() % 10) == 9 ? 2 : 1;
 	scales[tileIndex] = 0.f;
+	targets[tileIndex] = -1;
 	newTile = tileIndex;
 	growStartTime = currTime;
 	updateFlags |= GROW;

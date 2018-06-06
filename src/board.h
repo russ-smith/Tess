@@ -18,17 +18,19 @@ public:
 	void update();
 	void reset();
 
-	//tile data, one tile per corner
-	int values[16]{ 0 };
-	int targets[16];
-	float scales[16];
-	bool isMerging[16];
+	//compacted arrays for renderer
+	float drawPositions[64];
+	int drawValues[16];
+	float drawScales[16];
+	int numActive;
 
 	float angles[4]{ 1,0,1,0 };
 	double currTime;
+	float moveTime;
 	int updateFlags = 0;
 
 private:
+
 	void addTile();
 	void resetTile(int index);
 	int stateXZ[2]{ 0,0 };
@@ -36,4 +38,10 @@ private:
 	double moveStartTime;
 	double growStartTime;
 	int newTile;
+
+	//tile data, one tile per corner
+	int values[16]{ 0 };
+	int targets[16]{ -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1 };
+	float scales[16]{ 0 };
+	bool isMerging[16]{ false };
 };

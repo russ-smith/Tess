@@ -131,30 +131,15 @@ void Renderer::draw(double time) {
 	glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 34, 32);
 
 	//draw tiles
-	GLfloat scales[16];
-	GLfloat values[16];
-	GLfloat positions[64];
-	int numTiles = 0;
-	for (size_t i = 0; i < 16; i++) {
-		if (pBoard->values[i]) {
-			values[numTiles] = pBoard->values[i];
-			scales[numTiles] = pBoard->scales[i];
-			for (size_t j = 0; j < 4; j++) {
-				positions[4 * numTiles + j] = geometry::corners[4 * i + j];
-			}
-			numTiles++;
-		}
-	}
-
 	glBindBuffer(GL_ARRAY_BUFFER, tilePosInstanceBuffer);
-	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(positions), positions);
+	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(pBoard->drawPositions), pBoard->drawPositions);
 	glBindBuffer(GL_ARRAY_BUFFER, tileScaleInstanceBuffer);
-	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(scales), scales);
+	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(pBoard->drawScales), pBoard->drawScales);
 	glBindBuffer(GL_ARRAY_BUFFER, tileValueInstanceBuffer);
-	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(values), values);
+	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(pBoard->drawValues), pBoard->drawValues);
 	glBindVertexArray(tileVAO);
 	glUseProgram(tileShader);
-	glDrawElementsInstanced(GL_TRIANGLES, 240, GL_UNSIGNED_BYTE, 0, numTiles);
+	glDrawElementsInstanced(GL_TRIANGLES, 240, GL_UNSIGNED_BYTE, 0, pBoard->numActive);
 
 	//draw gui
 	glViewport(0, 0, width, height);

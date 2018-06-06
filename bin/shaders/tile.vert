@@ -19,6 +19,6 @@ void main(){
 	o.zx = mat2(angles.xy, -angles.y, angles.x) * offset.zx;
 	o.wy = mat2(angles.zw, -angles.w, angles.z) * offset.wy;
 	float wScale = 2./ -(o.w - 5);
-	gl_Position = vp * vec4(wScale * scale *(.6* pos + o.xyz),1);
+	gl_Position = vp * vec4(wScale * (.6* scale *pos + o.xyz),1);
 	normal = pos;
 }
