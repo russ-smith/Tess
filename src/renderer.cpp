@@ -1,9 +1,10 @@
 #include "renderer.h"
-#include "shaderloader.h"
+#include "assetloader.h"
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtc/quaternion.hpp"
 #include "board.h"
 #include "geometry.h"
+#include <iostream>
 
 void Renderer::init() {
 	gl3wInit();
@@ -80,7 +81,7 @@ void Renderer::init() {
 	glBufferData(GL_ARRAY_BUFFER, 16 * sizeof(GLfloat), nullptr, GL_DYNAMIC_DRAW);
 	glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, sizeof(GLfloat), 0);
 	glVertexAttribDivisor(2, 1);
-	glBindBuffer(GL_ARRAY_BUFFER, tileScaleInstanceBuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, tileValueInstanceBuffer);
 	glBufferData(GL_ARRAY_BUFFER, 16 * sizeof(GLfloat), nullptr, GL_DYNAMIC_DRAW);
 	glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, sizeof(GLfloat), 0);
 	glVertexAttribDivisor(3, 1);
@@ -94,7 +95,7 @@ void Renderer::init() {
 	cornerShader = loadShader("corner.vert", "board.frag");
 	guiShader = loadShader("gui.vert", "gui.frag");
 	edgeShader = loadShader("edge.vert", "board.frag");
-	tileShader = loadShader("tile.vert", "gui.frag");
+	tileShader = loadShader("tile.vert", "tile.frag");
 
 	//setup view-projection and rotation
 	glm::quat rot{ glm::vec3{ 0,0.55,0 } };
@@ -110,6 +111,8 @@ void Renderer::init() {
 	glBindBuffer(GL_UNIFORM_BUFFER, angleUniformBuffer);
 	glBufferData(GL_UNIFORM_BUFFER, 4 * sizeof(GLfloat), pBoard->angles, GL_DYNAMIC_DRAW);
 	glBindBufferBase(GL_UNIFORM_BUFFER, 1, angleUniformBuffer);
+
+	rampTex = loadTexture("ramp.png");
 }
 
 void Renderer::draw(double time) {
@@ -139,6 +142,10 @@ void Renderer::draw(double time) {
 	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(pBoard->drawValues), pBoard->drawValues);
 	glBindVertexArray(tileVAO);
 	glUseProgram(tileShader);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_1D, rampTex);
+	glBindTextureUnit(0, rampTex);
+	glUniform1i(glGetUniformLocation(tileShader, "ramp"), 0);
 	glDrawElementsInstanced(GL_TRIANGLES, 240, GL_UNSIGNED_BYTE, 0, pBoard->numActive);
 
 	//draw gui

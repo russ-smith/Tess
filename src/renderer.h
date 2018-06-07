@@ -17,6 +17,7 @@ private:
 	GLuint matrixUniformBuffer, angleUniformBuffer;
 	GLuint cornerShader, guiShader, edgeShader, tileShader;
 	GLuint cornerVAO, guiVAO, edgeVAO, tileVAO;
+	GLuint rampTex;
 	int width, height;
 	Board* pBoard;
 };

@@ -142,6 +142,9 @@ void Board::update() {
 		if (t >= 1) {
 			t = 1;
 			updateFlags ^= GROW;
+			for (size_t i = 0; i < 16; i++) {
+				std::cout << (int)drawValues[i];
+			}
 		}
 		else {
 			t *= (2 - t);

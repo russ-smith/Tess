@@ -20,7 +20,7 @@ public:
 
 	//compacted arrays for renderer
 	float drawPositions[64];
-	int drawValues[16];
+	float drawValues[16];
 	float drawScales[16];
 	int numActive;
 
