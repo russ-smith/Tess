@@ -1,7 +1,6 @@
 #include "gui.h"
 #include "geometry.h"
 #include "board.h"
-#include <iostream>
 
 GUI::GUI(int width, int height, Board * pBoard) : width(width), height(height), pBoard(pBoard) {
 	for (size_t i = 0; i < 12; i++) {
@@ -22,7 +21,6 @@ void GUI::mouseButton( double x, double y) {
 		if (buttons[i].left <= nx && buttons[i].right >= nx && buttons[i].bottom <= ny && buttons[i].top >= ny)
 			whichButton = i;
 	}
-	std::cout << "CLICKED: " << whichButton << std::endl;
 	if (whichButton < 0)
 		return;
 	else if (whichButton < 8)

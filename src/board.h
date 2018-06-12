@@ -28,6 +28,7 @@ public:
 	double currTime;
 	float moveTime;
 	int updateFlags = 0;
+	int score;
 
 private:
 

@@ -5,5 +5,6 @@ in vec3 vColor;
 out vec4 color;
 
 void main(){
-	color = vec4(vColor, 1);
+	float diff = dot(normal, normalize(vec3 (1,2,2)));
+	color = vec4(diff * vColor, 1);
 }
