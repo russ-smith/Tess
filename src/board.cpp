@@ -4,7 +4,6 @@
 #include <cmath>
 #include <cstdlib>
 
-
 #define HALF_PI 1.57079632679
 
 Board::Board(double time) {
@@ -44,7 +43,6 @@ void Board::beginMoveTiles(int dir){
 		if (values[start]) {
 			if (values[end]==values[start] || values[end] == 0) {
 				targets[start] = end;
-				//isMerging[start] = (values[end] > 0);
 				moveNum++;
 			}
 		} 
@@ -111,8 +109,9 @@ void Board::update() {
 			updateFlags ^= MOVE_TILES;
 			std::cout << "SCORE : " << score;
 		}
-		else 
+		else {
 			t = t * t * (3 - 2 * t);
+		}
 
 		int tileNum = 0;
 		for (size_t i = 0; i < 16; i++) {
@@ -187,7 +186,20 @@ void Board::addTile() {
 	newTile = tileIndex;
 	growStartTime = currTime;
 	updateFlags |= GROW;
+	if (numFree == 1 && checkGameOver()) {
+		//TODO REAL GAME OVER CODE
+		std::cout << "GAME OVER" << '\n'; 
+	}
 }
 
-void Board::resetTile(int index) {
+bool Board::checkGameOver() {
+	for (size_t i = 0; i < 4; i++) {
+		for (size_t j = 0; j < 16; j+=2) {
+			if (values[geometry::edges[i][j]] == values[geometry::edges[i][j + 1]])
+				return false;
+		}
+	}
+	return true;
 }
+
+

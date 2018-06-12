@@ -26,14 +26,12 @@ public:
 
 	float angles[4]{ 1,0,1,0 };
 	double currTime;
-	float moveTime;
 	int updateFlags = 0;
 	int score;
 
 private:
-
 	void addTile();
-	void resetTile(int index);
+	bool checkGameOver();
 	int stateXZ[2]{ 0,0 };
 	int stateYW[2]{ 0,0 };
 	double moveStartTime;
