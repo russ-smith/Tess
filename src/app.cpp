@@ -12,6 +12,7 @@ void App::run() {
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 	glfwWindowHint(GLFW_SRGB_CAPABLE, GLFW_TRUE);
+	glfwWindowHint(GLFW_SAMPLES, 4);
 	width = 960;	//TODO FIX THIS - ADAPT TO SCREEN
 	height = 720;
 	pWindow = glfwCreateWindow(width, height, "TESS", nullptr, nullptr);

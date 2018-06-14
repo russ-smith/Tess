@@ -145,6 +145,7 @@
   <ItemGroup>
     <ClCompile Include="src\app.cpp" />
     <ClCompile Include="src\board.cpp" />
+    <ClCompile Include="src\font.cpp" />
     <ClCompile Include="src\geometry.cpp" />
     <ClCompile Include="src\gui.cpp" />
     <ClCompile Include="src\main.cpp" />
@@ -154,6 +155,7 @@
   <ItemGroup>
     <ClInclude Include="src\app.h" />
     <ClInclude Include="src\board.h" />
+    <ClInclude Include="src\font.h" />
     <ClInclude Include="src\geometry.h" />
     <ClInclude Include="src\gui.h" />
     <ClInclude Include="src\renderer.h" />
@@ -165,6 +167,8 @@
     <None Include="bin\shaders\gui.vert" />
     <None Include="bin\shaders\board.frag" />
     <None Include="bin\shaders\corner.vert" />
+    <None Include="bin\shaders\text.frag" />
+    <None Include="bin\shaders\text.vert" />
     <None Include="bin\shaders\tile.frag" />
     <None Include="bin\shaders\tile.vert" />
   </ItemGroup>

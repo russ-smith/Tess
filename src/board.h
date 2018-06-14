@@ -1,12 +1,12 @@
 #pragma once
 
-#include "glm/vec4.hpp"
 
 enum flags {
 	ROT_XZ = 1,
 	ROT_YW = 2,
 	MOVE_TILES = 4,
-	GROW = 8
+	GROW = 8, 
+	SCORE_CHANGED = 16
 };
 
 class Board {
@@ -28,6 +28,7 @@ public:
 	double currTime;
 	int updateFlags = 0;
 	int score;
+	int bestTile;
 
 private:
 	void addTile();
@@ -38,7 +39,7 @@ private:
 	double growStartTime;
 	int newTile;
 
-	//tile data, one tile per corner
+	//internal tile data, one tile per corner
 	int values[16]{ 0 };
 	int targets[16]{ -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1 };
 	float scales[16]{ 0 };

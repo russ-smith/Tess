@@ -11,7 +11,9 @@ Board::Board(double time) {
 	unsigned int* seedptr = reinterpret_cast<unsigned int*>(&time);
 	srand(seedptr[0] ^ seedptr[1]);
 	score = 0;
+	bestTile = 1;
 	addTile();
+	updateFlags |= SCORE_CHANGED;
 }
 
 void Board::beginRotateXZ(int dir) {
@@ -95,7 +97,11 @@ void Board::update() {
 					if (values[targets[i]]) {
 						values[targets[i]]++;
 						isMerging[targets[i]] = true;
-						score += 1 << values[targets[i]] ;
+						score += 1 << values[targets[i]];
+						if (values[targets[i]] > bestTile) {
+							bestTile++;
+						}
+						updateFlags |= SCORE_CHANGED;
 					}
 					else {
 						values[targets[i]] = values[i];
@@ -107,7 +113,6 @@ void Board::update() {
 			}
 			addTile();
 			updateFlags ^= MOVE_TILES;
-			std::cout << "SCORE : " << score;
 		}
 		else {
 			t = t * t * (3 - 2 * t);
@@ -180,7 +185,11 @@ void Board::addTile() {
 		}
 	}
 	int tileIndex = freeTiles[rand() % numFree];
-	values[tileIndex] = (rand() % 10) == 9 ? 2 : 1;
+	int value = (rand() % 10) == 9 ? 2 : 1;
+	if (value > bestTile) {
+		bestTile = 2;
+	}
+	values[tileIndex] = value;
 	scales[tileIndex] = 0.f;
 	targets[tileIndex] = -1;
 	newTile = tileIndex;

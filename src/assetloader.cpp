@@ -1,7 +1,9 @@
 #include "assetloader.h"
+#include "font.h"
 #include <fstream>
 #include <vector>
 #include <iostream>
+#include <sstream>
 
 using namespace std;
 
@@ -42,7 +44,7 @@ GLuint loadShader(string vert, string frag) {
 int decodePNG(std::vector<unsigned char>& out_image, unsigned long& image_width, unsigned long& image_height, const unsigned char* in_png, size_t in_size, bool convert_to_rgba32 = true);
 
 GLuint loadTexture(string name) {
-	ifstream file("textures/" + name, ios::binary);
+	ifstream file("textures/" + name + ".png", ios::binary);
 	if (!file.is_open())
 		return 0;
 	vector<char> img;
@@ -69,7 +71,62 @@ GLuint loadTexture(string name) {
 }
 
 
+Font* loadFont(string name) {
+	ifstream file("fonts/" + name + ".fnt");
+	GLuint tex = loadTexture(name);
+	if (!file.is_open() || !tex) {
+		return nullptr;
+	}
+	string line;
+	string temp;
+	int w;
+	int h;
+	unordered_map<int, Character> characters;
+	unordered_map<pair<int, int>, int, pair_hash> kernings;
 
+	while (!file.eof()) {
+		getline(file, line);
+		istringstream ss(line);
+		ss >> temp;
+		if (temp == "common") {
+			ss >> temp; ss >> temp; ss >> temp;
+			w = stoi(temp.substr(temp.find('=') + 1));
+			ss >> temp;
+			h = stoi(temp.substr(temp.find('=') + 1));
+		}
+		else if (temp == "char") {
+			Character c;
+			ss >> temp;
+			c.id = stoi(temp.substr(temp.find('=') + 1));
+			ss >> temp;
+			c.x = stoi(temp.substr(temp.find('=') + 1));
+			ss >> temp;
+			c.y = stoi(temp.substr(temp.find('=') + 1));
+			ss >> temp;
+			c.width = stoi(temp.substr(temp.find('=') + 1));
+			ss >> temp;
+			c.height = stoi(temp.substr(temp.find('=') + 1));
+			ss >> temp;
+			c.xoffset = stoi(temp.substr(temp.find('=') + 1));
+			ss >> temp;
+			c.yoffset = stoi(temp.substr(temp.find('=') + 1)); 
+			ss >> temp;
+			c.xadvance = stoi(temp.substr(temp.find('=') + 1));
+			characters[c.id] = c;
+		}
+		else if (temp == "kerning") {
+			ss >> temp;
+			int first = stoi(temp.substr(temp.find('=') + 1));
+			ss >> temp;
+			int second = stoi(temp.substr(temp.find('=') + 1));
+			ss >> temp;
+			int amount = stoi(temp.substr(temp.find('=') + 1));
+			kernings[pair<int, int>{first, second}] = amount;
+		} 		
+	}
+	Font * result = new Font(characters, kernings, w, h, tex);
+	return result;
+}
 
 
 
