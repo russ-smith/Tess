@@ -15,7 +15,7 @@ public:
 private:
 	int bufferText(int x, int y, std::string text, int bufferPos);
 	GLuint sphereVertBuffer, sphereIndexBuffer;
-	GLuint guiVertBuffer;
+	GLuint guiVertBuffer, guiUVBuffer;
 	GLuint cornerInstanceBuffer, edgeInstanceBuffer;
 	GLuint tilePosInstanceBuffer, tileScaleInstanceBuffer, tileValueInstanceBuffer;
 	GLuint textVertBuffer, textUVBuffer;
@@ -23,7 +23,7 @@ private:
 	GLuint matrixUniformBuffer, angleUniformBuffer;
 	GLuint cornerShader, guiShader, edgeShader, tileShader, textShader;
 	GLuint cornerVAO, guiVAO, edgeVAO, tileVAO, textVAO;
-	GLuint rampTex;
+	GLuint rampTex, buttonTex;
 	int width, height;
 	Board* pBoard;
 	Font* pFont;

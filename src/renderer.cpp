@@ -47,12 +47,17 @@ void Renderer::init() {
 
 	//setup gui
 	glGenBuffers(1, &guiVertBuffer);
+	glGenBuffers(1, &guiUVBuffer);
 	glGenVertexArrays(1, &guiVAO);
 	glBindVertexArray(guiVAO);
 	glBindBuffer(GL_ARRAY_BUFFER, guiVertBuffer);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(geometry::buttonVerts), geometry::buttonVerts, GL_STATIC_DRAW);
 	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), 0);
+	glBindBuffer(GL_ARRAY_BUFFER, guiUVBuffer);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(geometry::buttonUVs), geometry::buttonUVs, GL_STATIC_DRAW);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), 0);
 	glEnableVertexAttribArray(0);
+	glEnableVertexAttribArray(1);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, quadIndexBuffer);
 	
 	//setup edges	
@@ -141,10 +146,25 @@ void Renderer::init() {
 	glBindBufferBase(GL_UNIFORM_BUFFER, 1, angleUniformBuffer);
 
 	rampTex = loadTexture("ramp");
+	buttonTex = loadTexture("buttons");
 	pFont = loadFont("cooper32");
 	
 	bufferText(270, -330, "SCORE:", 0);
 	bufferText(270, -250, "BEST TILE:", 6);
+
+	//bind texture units
+	glUseProgram(tileShader);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_1D, rampTex);
+	glUniform1i(glGetUniformLocation(tileShader, "ramp"), 0);
+	glUseProgram(guiShader);
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, buttonTex);
+	glUniform1i(glGetUniformLocation(guiShader, "buttons"), 1);
+	glUseProgram(textShader);
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_2D, pFont->texID);
+	glUniform1i(glGetUniformLocation(textShader, "glyphs"), 2);
 }
 
 int Renderer::bufferText(int x, int y, std::string text, int bufferPos) {
@@ -185,9 +205,6 @@ void Renderer::draw(double time) {
 	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(pBoard->drawValues), pBoard->drawValues);
 	glBindVertexArray(tileVAO);
 	glUseProgram(tileShader);
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_1D, rampTex);
-	glUniform1i(glGetUniformLocation(tileShader, "ramp"), 0);
 	glDrawElementsInstanced(GL_TRIANGLES, 240, GL_UNSIGNED_BYTE, 0, pBoard->numActive);
 
 	glEnable(GL_BLEND);
@@ -207,9 +224,6 @@ void Renderer::draw(double time) {
 	}
 	glBindVertexArray(textVAO);
 	glUseProgram(textShader);
-	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, pFont->texID);
-	glUniform1i(glGetUniformLocation(textShader, "glyphs"), 1);
 	glDrawElements(GL_TRIANGLES, 6 * textLength, GL_UNSIGNED_BYTE, 0);
 }
 

@@ -1,7 +1,10 @@
 #version 330 core
 
+uniform sampler2D buttons;
+
+in vec2 vuv;
 out vec4 color;
 
 void main(){
-	color = vec4(1,0,0,1);
+	color = texture(buttons, vuv);
 }
