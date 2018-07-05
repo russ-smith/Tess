@@ -123,13 +123,25 @@ void Renderer::init() {
 	glEnableVertexAttribArray(1);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, quadIndexBuffer);
 	
+	//setup screen fader
+	glGenBuffers(1, &fadeVertBuffer);
+	glGenVertexArrays(1, &fadeVAO);
+	glBindVertexArray(fadeVAO);
+	glBindBuffer(GL_ARRAY_BUFFER, fadeVertBuffer);
+	GLfloat corners[]{ -1.f, -1.f, 1.f, -1.f, -1.f, 1.f, 1.f, 1.f };
+	glBufferData(GL_ARRAY_BUFFER, sizeof(corners), corners, GL_STATIC_DRAW);
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), 0);
+	glEnableVertexAttribArray(0);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, quadIndexBuffer);
+
 	//compile shaders
 	cornerShader = loadShader("corner.vert", "board.frag");
 	guiShader = loadShader("gui.vert", "gui.frag");
 	edgeShader = loadShader("edge.vert", "board.frag");
 	tileShader = loadShader("tile.vert", "tile.frag");
 	textShader = loadShader("text.vert", "text.frag");
-	
+	fadeShader = loadShader("fade.vert", "fade.frag");
+
 	//setup view-projection and rotation
 	glm::quat rot{ glm::vec3{ 0,0.55,0 } };
 	glm::vec3 camPos = rot * glm::vec3{ 0,5,4 };
@@ -147,10 +159,9 @@ void Renderer::init() {
 
 	rampTex = loadTexture("ramp");
 	buttonTex = loadTexture("buttons");
-	pFont = loadFont("cooper32");
+	pSmallFont = loadFont("cooper32");
+	pBigFont = loadFont("cooper64");
 	
-	bufferText(270, -330, "SCORE:", 0);
-	bufferText(270, -250, "BEST TILE:", 6);
 
 	//bind texture units
 	glUseProgram(tileShader);
@@ -161,19 +172,24 @@ void Renderer::init() {
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, buttonTex);
 	glUniform1i(glGetUniformLocation(guiShader, "buttons"), 1);
-	glUseProgram(textShader);
-	glActiveTexture(GL_TEXTURE2);
-	glBindTexture(GL_TEXTURE_2D, pFont->texID);
-	glUniform1i(glGetUniformLocation(textShader, "glyphs"), 2);
 }
 
-int Renderer::bufferText(int x, int y, std::string text, int bufferPos) {
+int Renderer::bufferText(int x, int y, std::string text, int bufferPos, Font* pFont) {
 	pFont->makeText(x, y, text, textPos, textUV);
 	glBindBuffer(GL_ARRAY_BUFFER, textVertBuffer);
 	glBufferSubData(GL_ARRAY_BUFFER, 8*sizeof(GLfloat)*bufferPos, sizeof(GLfloat)*textPos.size(), &textPos[0]);
 	glBindBuffer(GL_ARRAY_BUFFER, textUVBuffer);
 	glBufferSubData(GL_ARRAY_BUFFER, 8*sizeof(GLfloat)*bufferPos, sizeof(GLfloat)*textUV.size(), &textUV[0]);
 	return bufferPos + text.length();
+}
+
+void Renderer::resetText() {
+	glUseProgram(textShader);
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_2D, pSmallFont->texID);
+	glUniform1i(glGetUniformLocation(textShader, "glyphs"), 2);
+	bufferText(270, -330, "SCORE:", 0, pSmallFont);
+	bufferText(270, -250, "TILE:", 6, pSmallFont);
 }
 
 void Renderer::draw(double time) {
@@ -216,15 +232,38 @@ void Renderer::draw(double time) {
 	glUseProgram(guiShader);
 	glDrawElements(GL_TRIANGLES, 72, GL_UNSIGNED_BYTE, 0);
 
+	//fade screen if game over
+	if (pBoard->updateFlags & (GAME_OVER | BEGIN_GAME_OVER)) {
+		glUseProgram(fadeShader);
+		glUniform1f(glGetUniformLocation(fadeShader, "fade"), pBoard->fadeAlpha);
+		glBindVertexArray(fadeVAO);
+		glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_BYTE, 0);
+	}
+
 	//draw text
 	if (pBoard->updateFlags & SCORE_CHANGED) {
-		pBoard->updateFlags ^= SCORE_CHANGED;
-		int i = bufferText(270, -295, std::to_string(pBoard->score), 16);
-		textLength = bufferText(270, -215, std::to_string(1 << pBoard->bestTile), i);
+		if (pBoard->updateFlags & GAME_OVER) {
+			int i = bufferText(-400, -250, "GAME OVER", 0, pBigFont);
+			i = bufferText(-400, -150, "SCORE:", i, pBigFont);
+			i = bufferText(-400, -50, "TILE:", i, pBigFont);
+			i = bufferText(-400, 50, "HI SCORE: 123456", i, pBigFont);
+			textLength = bufferText(-400, 150, "HI TILE:", i, pBigFont);
+			glUseProgram(textShader);
+			glActiveTexture(GL_TEXTURE2);
+			glBindTexture(GL_TEXTURE_2D, pBigFont->texID);
+			glUniform1i(glGetUniformLocation(textShader, "glyphs"), 2);
+		}
+		else {
+			if (pBoard->updateFlags & RESTART) {
+				resetText();
+			}
+			int i = bufferText(270, -295, std::to_string(pBoard->score), 11, pSmallFont);
+			textLength = bufferText(270, -215, std::to_string(1 << pBoard->bestTile), i, pSmallFont);
+		}
 	}
 	glBindVertexArray(textVAO);
 	glUseProgram(textShader);
-	glDrawElements(GL_TRIANGLES, 6 * textLength, GL_UNSIGNED_BYTE, 0);
+	glDrawElements(GL_TRIANGLES, 6 * textLength, GL_UNSIGNED_BYTE, 0);	
 }
 
 

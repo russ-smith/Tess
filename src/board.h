@@ -5,8 +5,11 @@ enum flags {
 	ROT_XZ = 1,
 	ROT_YW = 2,
 	MOVE_TILES = 4,
-	GROW = 8, 
-	SCORE_CHANGED = 16
+	GROW = 8,
+	SCORE_CHANGED = 16,
+	BEGIN_GAME_OVER = 32,
+	GAME_OVER = 64,
+	RESTART = 128
 };
 
 class Board {
@@ -16,7 +19,8 @@ public:
 	void beginRotateYW(int dir);
 	void beginMoveTiles(int dir);
 	void update();
-	void reset();
+	void resetBoard();
+	void resetOneFrameFlags();
 
 	//compacted arrays for renderer
 	float drawPositions[64];
@@ -25,10 +29,11 @@ public:
 	int numActive;
 
 	float angles[4]{ 1,0,1,0 };
-	double currTime;
+	float fadeAlpha;
 	int updateFlags = 0;
 	int score;
 	int bestTile;
+	double currTime;
 
 private:
 	void addTile();
@@ -40,8 +45,8 @@ private:
 	int newTile;
 
 	//internal tile data, one tile per corner
-	int values[16]{ 0 };
-	int targets[16]{ -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1 };
-	float scales[16]{ 0 };
-	bool isMerging[16]{ false };
+	int values[16];
+	int targets[16];
+	float scales[16];
+	bool isMerging[16];
 };

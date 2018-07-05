@@ -10,10 +10,7 @@ Board::Board(double time) {
 	currTime = time;
 	unsigned int* seedptr = reinterpret_cast<unsigned int*>(&time);
 	srand(seedptr[0] ^ seedptr[1]);
-	score = 0;
-	bestTile = 1;
-	addTile();
-	updateFlags |= SCORE_CHANGED;
+	resetBoard();
 }
 
 void Board::beginRotateXZ(int dir) {
@@ -149,6 +146,12 @@ void Board::update() {
 				scales[i] = 1;
 			}
 			updateFlags ^= GROW;
+			if (updateFlags & BEGIN_GAME_OVER) {
+				fadeAlpha = 0.95;
+				updateFlags ^= BEGIN_GAME_OVER;
+				updateFlags |= GAME_OVER;
+				updateFlags |= SCORE_CHANGED;
+			}
 		}
 		scales[newTile] = t*(2-t);
 		int tileNum = 0;
@@ -169,10 +172,27 @@ void Board::update() {
 			}
 		}
 		numActive = tileNum;
+		if (updateFlags&BEGIN_GAME_OVER) {
+			fadeAlpha = 0.9*t;
+		}
 	}	
 }
 
-void Board::reset() {
+void Board::resetBoard() {
+	score = 0;
+	bestTile = 1;
+	for (size_t i = 0; i < 16; i++) {
+		values[i] = 0;
+		scales[i] = 0;
+		targets[i] = -1;
+		isMerging[i] = false;
+	}
+	updateFlags = SCORE_CHANGED | RESTART;
+	addTile();
+}
+
+void Board::resetOneFrameFlags() {
+	updateFlags &= ~(SCORE_CHANGED | RESTART);
 }
 
 void Board::addTile() {
@@ -196,7 +216,7 @@ void Board::addTile() {
 	growStartTime = currTime;
 	updateFlags |= GROW;
 	if (numFree == 1 && checkGameOver()) {
-		//TODO REAL GAME OVER CODE
+		updateFlags |= BEGIN_GAME_OVER;
 		std::cout << "GAME OVER" << '\n'; 
 	}
 }

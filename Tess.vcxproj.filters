@@ -94,5 +94,11 @@
     <None Include="bin\shaders\text.vert">
       <Filter>Shaders</Filter>
     </None>
+    <None Include="bin\shaders\fade.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="bin\shaders\fade.vert">
+      <Filter>Shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>

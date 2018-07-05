@@ -163,6 +163,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="bin\shaders\edge.vert" />
+    <None Include="bin\shaders\fade.frag" />
+    <None Include="bin\shaders\fade.vert" />
     <None Include="bin\shaders\gui.frag" />
     <None Include="bin\shaders\gui.vert" />
     <None Include="bin\shaders\board.frag" />

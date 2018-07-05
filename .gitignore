@@ -12,12 +12,8 @@
 x64/
 x86/
 bld/
-[Bb]in/*
 [Oo]bj/
 [Ll]og/
-
-# Reinclude shaders
-![Bb]in/shaders/
 
 
 # Visual Studio 2015/2017 cache/options directory
@@ -50,6 +46,7 @@ bld/
 *.pidb
 *.svclog
 *.scc
+*.exe
 
 # Visual C++ cache files
 ipch/

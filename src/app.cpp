@@ -13,7 +13,7 @@ void App::run() {
 	glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 	glfwWindowHint(GLFW_SRGB_CAPABLE, GLFW_TRUE);
 	glfwWindowHint(GLFW_SAMPLES, 4);
-	width = 960;	//TODO FIX THIS - ADAPT TO SCREEN
+	width = 960; 
 	height = 720;
 	pWindow = glfwCreateWindow(width, height, "TESS", nullptr, nullptr);
 	glfwSetMouseButtonCallback(pWindow, mouseButtonCB);
@@ -31,9 +31,12 @@ void App::run() {
 		if (pBoard->updateFlags)
 			pBoard->update();
 		pRenderer->draw(glfwGetTime());
+		pBoard->resetOneFrameFlags();
 		glfwSwapBuffers(pWindow);
 		glfwPollEvents();
 	}
+
+	glfwTerminate();
 }
 
 void App::mouseButtonCB(GLFWwindow * window, int button, int action, int mods) {

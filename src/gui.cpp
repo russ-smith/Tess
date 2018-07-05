@@ -13,7 +13,10 @@ GUI::GUI(int width, int height, Board * pBoard) : width(width), height(height), 
 
 void GUI::mouseButton( double x, double y) {
 	if (pBoard->updateFlags != 0)
-		return;
+		if (pBoard->updateFlags & GAME_OVER) {
+			pBoard->resetBoard();
+		}
+		else return;
 	int whichButton = -1;
 	float nx = static_cast<float>(x / width);
 	float ny = static_cast<float>(1. - (y / height));
