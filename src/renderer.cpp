@@ -17,9 +17,9 @@ void Renderer::init() {
 	//setup quad indices
 	glGenBuffers(1, &quadIndexBuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, quadIndexBuffer);
-	glBufferData(GL_ARRAY_BUFFER, 300 * sizeof(GLubyte), nullptr, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, 600 * sizeof(GLubyte), nullptr, GL_STATIC_DRAW);
 	GLubyte* mub = reinterpret_cast<GLubyte*>(glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY));
-	for (size_t i = 0, j = 0; i < 300; i+=6, j+=4) {
+	for (size_t i = 0, j = 0; i < 600; i+=6, j+=4) {
 		mub[i] = j;
 		mub[i + 1] = mub[i + 5] = j + 1;
 		mub[i + 2] = mub[i + 4] = j + 2;
@@ -108,16 +108,16 @@ void Renderer::init() {
 	glEnableVertexAttribArray(3);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, sphereIndexBuffer);
 
-	//setup text buffers with space for 50 chars
+	//setup text buffers with space for 100 chars
 	glGenBuffers(1, &textVertBuffer);
 	glGenBuffers(1, &textUVBuffer);
 	glGenVertexArrays(1, &textVAO);
 	glBindVertexArray(textVAO);
 	glBindBuffer(GL_ARRAY_BUFFER, textVertBuffer);
-	glBufferData(GL_ARRAY_BUFFER, 400 * sizeof(GLfloat), nullptr, GL_DYNAMIC_DRAW);	
+	glBufferData(GL_ARRAY_BUFFER, 800 * sizeof(GLfloat), nullptr, GL_DYNAMIC_DRAW);	
 	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), 0);
 	glBindBuffer(GL_ARRAY_BUFFER, textUVBuffer);
-	glBufferData(GL_ARRAY_BUFFER, 400 * sizeof(GLfloat), nullptr, GL_DYNAMIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, 800 * sizeof(GLfloat), nullptr, GL_DYNAMIC_DRAW);
 	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), 0);
 	glEnableVertexAttribArray(0);
 	glEnableVertexAttribArray(1);
@@ -244,10 +244,10 @@ void Renderer::draw(double time) {
 	if (pBoard->updateFlags & SCORE_CHANGED) {
 		if (pBoard->updateFlags & GAME_OVER) {
 			int i = bufferText(-400, -250, "GAME OVER", 0, pBigFont);
-			i = bufferText(-400, -150, "SCORE:", i, pBigFont);
-			i = bufferText(-400, -50, "TILE:", i, pBigFont);
-			i = bufferText(-400, 50, "HI SCORE: 123456", i, pBigFont);
-			textLength = bufferText(-400, 150, "HI TILE:", i, pBigFont);
+			i = bufferText(-400, -150, "SCORE: " + std::to_string(pBoard->score), i, pBigFont);
+			i = bufferText(-400, -50, "TILE: " + std::to_string(1 << pBoard->tile), i, pBigFont);
+			i = bufferText(-400, 50, "HI SCORE: " + std::to_string(pBoard->hiScore), i, pBigFont);
+			textLength = bufferText(-400, 150, "HI TILE: " + std::to_string(1 << pBoard->hiTile), i, pBigFont);
 			glUseProgram(textShader);
 			glActiveTexture(GL_TEXTURE2);
 			glBindTexture(GL_TEXTURE_2D, pBigFont->texID);
@@ -258,7 +258,7 @@ void Renderer::draw(double time) {
 				resetText();
 			}
 			int i = bufferText(270, -295, std::to_string(pBoard->score), 11, pSmallFont);
-			textLength = bufferText(270, -215, std::to_string(1 << pBoard->bestTile), i, pSmallFont);
+			textLength = bufferText(270, -215, std::to_string(1 << pBoard->tile), i, pSmallFont);
 		}
 	}
 	glBindVertexArray(textVAO);

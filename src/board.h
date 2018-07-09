@@ -32,7 +32,9 @@ public:
 	float fadeAlpha;
 	int updateFlags = 0;
 	int score;
-	int bestTile;
+	int tile;
+	int hiScore;
+	int hiTile;
 	double currTime;
 
 private:

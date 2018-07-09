@@ -10,6 +10,9 @@ Board::Board(double time) {
 	currTime = time;
 	unsigned int* seedptr = reinterpret_cast<unsigned int*>(&time);
 	srand(seedptr[0] ^ seedptr[1]);
+
+	hiScore = 0;
+	hiTile = 0;
 	resetBoard();
 }
 
@@ -95,8 +98,8 @@ void Board::update() {
 						values[targets[i]]++;
 						isMerging[targets[i]] = true;
 						score += 1 << values[targets[i]];
-						if (values[targets[i]] > bestTile) {
-							bestTile++;
+						if (values[targets[i]] > tile) {
+							tile++;
 						}
 						updateFlags |= SCORE_CHANGED;
 					}
@@ -180,7 +183,7 @@ void Board::update() {
 
 void Board::resetBoard() {
 	score = 0;
-	bestTile = 1;
+	tile = 1;
 	for (size_t i = 0; i < 16; i++) {
 		values[i] = 0;
 		scales[i] = 0;
@@ -206,8 +209,8 @@ void Board::addTile() {
 	}
 	int tileIndex = freeTiles[rand() % numFree];
 	int value = (rand() % 10) == 9 ? 2 : 1;
-	if (value > bestTile) {
-		bestTile = 2;
+	if (value > tile) {
+		tile = 2;
 	}
 	values[tileIndex] = value;
 	scales[tileIndex] = 0.f;
@@ -217,7 +220,12 @@ void Board::addTile() {
 	updateFlags |= GROW;
 	if (numFree == 1 && checkGameOver()) {
 		updateFlags |= BEGIN_GAME_OVER;
-		std::cout << "GAME OVER" << '\n'; 
+		if (score > hiScore) {
+			hiScore = score;
+		}
+		if (tile > hiTile) {
+			hiTile = tile;
+		}
 	}
 }
 
