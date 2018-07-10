@@ -1,6 +1,6 @@
 #include "board.h"
 #include "geometry.h"
-#include <iostream>
+#include "assetloader.h"
 #include <cmath>
 #include <cstdlib>
 
@@ -10,9 +10,9 @@ Board::Board(double time) {
 	currTime = time;
 	unsigned int* seedptr = reinterpret_cast<unsigned int*>(&time);
 	srand(seedptr[0] ^ seedptr[1]);
-
-	hiScore = 0;
-	hiTile = 0;
+	intPair scores = loadScores();
+	hiScore = scores.a;
+	hiTile = scores.b;
 	resetBoard();
 }
 
@@ -101,7 +101,7 @@ void Board::update() {
 						if (values[targets[i]] > tile) {
 							tile++;
 						}
-						updateFlags |= SCORE_CHANGED;
+						updateFlags |= TEXT_CHANGED;
 					}
 					else {
 						values[targets[i]] = values[i];
@@ -153,7 +153,7 @@ void Board::update() {
 				fadeAlpha = 0.95;
 				updateFlags ^= BEGIN_GAME_OVER;
 				updateFlags |= GAME_OVER;
-				updateFlags |= SCORE_CHANGED;
+				updateFlags |= TEXT_CHANGED;
 			}
 		}
 		scales[newTile] = t*(2-t);
@@ -176,7 +176,7 @@ void Board::update() {
 		}
 		numActive = tileNum;
 		if (updateFlags&BEGIN_GAME_OVER) {
-			fadeAlpha = 0.9*t;
+			fadeAlpha = 0.95*t;
 		}
 	}	
 }
@@ -190,12 +190,12 @@ void Board::resetBoard() {
 		targets[i] = -1;
 		isMerging[i] = false;
 	}
-	updateFlags = SCORE_CHANGED | RESTART;
+	updateFlags = TEXT_CHANGED | RESTART;
 	addTile();
 }
 
 void Board::resetOneFrameFlags() {
-	updateFlags &= ~(SCORE_CHANGED | RESTART);
+	updateFlags &= ~(TEXT_CHANGED | RESTART);
 }
 
 void Board::addTile() {
@@ -220,11 +220,17 @@ void Board::addTile() {
 	updateFlags |= GROW;
 	if (numFree == 1 && checkGameOver()) {
 		updateFlags |= BEGIN_GAME_OVER;
+		bool needsSave = false;
 		if (score > hiScore) {
 			hiScore = score;
+			needsSave = true;
 		}
 		if (tile > hiTile) {
 			hiTile = tile;
+			needsSave = true;
+		}
+		if (needsSave) {
+			saveScores(hiScore, hiTile);
 		}
 	}
 }

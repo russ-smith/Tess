@@ -1,11 +1,9 @@
 #include "renderer.h"
 #include "assetloader.h"
 #include "glm/gtc/matrix_transform.hpp"
-#include "glm/gtc/quaternion.hpp"
 #include "board.h"
 #include "geometry.h"
 #include "font.h"
-#include <iostream>
 
 void Renderer::init() {
 	gl3wInit();
@@ -143,8 +141,7 @@ void Renderer::init() {
 	fadeShader = loadShader("fade.vert", "fade.frag");
 
 	//setup view-projection and rotation
-	glm::quat rot{ glm::vec3{ 0,0.55,0 } };
-	glm::vec3 camPos = rot * glm::vec3{ 0,5,4 };
+	glm::vec3 camPos = glm::vec3{ 1.8f,5.f,3.3f };
 	glm::mat4 VP = glm::perspective(.9f, 1.f, 1.f, 19.f) * glm::lookAt(camPos, glm::vec3{ 0.f,0.f,0.f }, glm::vec3{ 0.f,1.f,0.f });
 
 	glGenBuffers(1, &matrixUniformBuffer);
@@ -241,7 +238,7 @@ void Renderer::draw(double time) {
 	}
 
 	//draw text
-	if (pBoard->updateFlags & SCORE_CHANGED) {
+	if (pBoard->updateFlags & TEXT_CHANGED) {
 		if (pBoard->updateFlags & GAME_OVER) {
 			int i = bufferText(-400, -250, "GAME OVER", 0, pBigFont);
 			i = bufferText(-400, -150, "SCORE: " + std::to_string(pBoard->score), i, pBigFont);

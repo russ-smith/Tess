@@ -2,7 +2,6 @@
 #include "font.h"
 #include <fstream>
 #include <vector>
-#include <iostream>
 #include <sstream>
 
 using namespace std;
@@ -127,6 +126,37 @@ Font* loadFont(string name) {
 	}
 	Font * result = new Font(characters, kernings, w, h, tex);
 	return result;
+}
+
+//simple hash function from stackoverflow user Thomas Mueller
+int hashInt(int i) {
+	i = ((i >> 16) ^ i) * 0x45d9f3b;
+	i = ((i >> 16) ^ i) * 0x45d9f3b;
+	return (i >> 16) ^ i;
+}
+
+intPair loadScores() {
+	ifstream file("save.data", ios::binary);
+	if (!file.is_open()) {
+		return intPair{ 0, 0 };
+	}
+	char data[12];
+	file.read(&data[0], 12);
+	int* intPtr = reinterpret_cast<int*>(&data[0]);
+	int score = intPtr[0];
+	int tile = intPtr[1];
+	int hash = intPtr[2];
+	if( (hashInt(score) ^ hashInt(tile)) != hash) {
+		return intPair{ 0, 0 };
+	}
+	return intPair{ score, tile };
+}
+
+void saveScores(int score, int tile) {
+	ofstream file("save.data", ios::binary);
+	int data[3]{ score, tile, hashInt(score) ^ hashInt(tile) };
+	char* charPtr = reinterpret_cast<char *>(&data[0]);
+	file.write(charPtr, 12);
 }
 
 

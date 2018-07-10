@@ -6,7 +6,7 @@ enum flags {
 	ROT_YW = 2,
 	MOVE_TILES = 4,
 	GROW = 8,
-	SCORE_CHANGED = 16,
+	TEXT_CHANGED = 16,
 	BEGIN_GAME_OVER = 32,
 	GAME_OVER = 64,
 	RESTART = 128
