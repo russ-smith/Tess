@@ -202,7 +202,7 @@ void Renderer::draw(double time) {
 	//draw corner spheres
 	glBindVertexArray(cornerVAO);
 	glUseProgram(cornerShader);
-	glDrawElementsInstanced(GL_TRIANGLES, 240, GL_UNSIGNED_BYTE, 0, 16);
+	glDrawElementsInstanced(GL_TRIANGLES, 960, GL_UNSIGNED_BYTE, 0, 16);
 	
 	//draw edges
 	glBindVertexArray(edgeVAO);
@@ -218,7 +218,7 @@ void Renderer::draw(double time) {
 	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(pBoard->drawValues), pBoard->drawValues);
 	glBindVertexArray(tileVAO);
 	glUseProgram(tileShader);
-	glDrawElementsInstanced(GL_TRIANGLES, 240, GL_UNSIGNED_BYTE, 0, pBoard->numActive);
+	glDrawElementsInstanced(GL_TRIANGLES, 960, GL_UNSIGNED_BYTE, 0, pBoard->numActive);
 
 	glEnable(GL_BLEND);
 	glDisable(GL_DEPTH_TEST);
