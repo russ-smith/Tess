@@ -32,4 +32,6 @@ private:
 	std::vector<float> textPos;
 	std::vector<float> textUV;
 	int textLength;
+
+	GLuint debugShader, debugVAO;
 };

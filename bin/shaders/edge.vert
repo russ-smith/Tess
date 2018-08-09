@@ -1,10 +1,10 @@
 #version 330 core
 
-layout (binding = 0, std140) uniform transform{
+layout (std140) uniform transform{
 	mat4 vp;
 };
 
-layout (binding = 1, std140) uniform rotation{
+layout (std140) uniform rotation{
 	vec4 angles;
 };
 

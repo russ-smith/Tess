@@ -43,6 +43,14 @@ void Renderer::init() {
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, sphereIndexBuffer);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(geometry::sphereTris), geometry::sphereTris, GL_STATIC_DRAW);
 
+	//DEBUG//
+	glGenVertexArrays(1, &debugVAO);
+	glBindVertexArray(debugVAO);
+	glBindBuffer(GL_ARRAY_BUFFER, sphereVertBuffer);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), 0);
+	glEnableVertexAttribArray(0);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, sphereIndexBuffer);
+
 	//setup gui
 	glGenBuffers(1, &guiVertBuffer);
 	glGenBuffers(1, &guiUVBuffer);
@@ -139,6 +147,7 @@ void Renderer::init() {
 	tileShader = loadShader("tile.vert", "tile.frag");
 	textShader = loadShader("text.vert", "text.frag");
 	fadeShader = loadShader("fade.vert", "fade.frag");
+	debugShader = loadShader("debug.vert", "board.frag");
 
 	//setup view-projection and rotation
 	glm::vec3 camPos = glm::vec3{ 1.8f,5.f,3.3f };
@@ -160,7 +169,7 @@ void Renderer::init() {
 	pBigFont = loadFont("cooper64");
 	
 
-	//bind texture units
+	//bind texture units and uniform blocks
 	glUseProgram(tileShader);
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_1D, rampTex);
@@ -169,6 +178,13 @@ void Renderer::init() {
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, buttonTex);
 	glUniform1i(glGetUniformLocation(guiShader, "buttons"), 1);
+
+	glUniformBlockBinding(cornerShader, glGetUniformBlockIndex(cornerShader, "transform"), 0);
+	glUniformBlockBinding(cornerShader, glGetUniformBlockIndex(cornerShader, "rotation"), 1);
+	glUniformBlockBinding(edgeShader, glGetUniformBlockIndex(edgeShader, "transform"), 0);
+	glUniformBlockBinding(edgeShader, glGetUniformBlockIndex(edgeShader, "rotation"), 1);
+	glUniformBlockBinding(tileShader, glGetUniformBlockIndex(tileShader, "transform"), 0);
+	glUniformBlockBinding(tileShader, glGetUniformBlockIndex(tileShader, "rotation"), 1);
 }
 
 int Renderer::bufferText(int x, int y, std::string text, int bufferPos, Font* pFont) {
@@ -219,6 +235,10 @@ void Renderer::draw(double time) {
 	glBindVertexArray(tileVAO);
 	glUseProgram(tileShader);
 	glDrawElementsInstanced(GL_TRIANGLES, 960, GL_UNSIGNED_BYTE, 0, pBoard->numActive);
+
+	/*glUseProgram(debugShader);
+	glBindVertexArray(debugVAO);
+	glDrawElements(GL_TRIANGLES, 960, GL_UNSIGNED_BYTE, 0);*/
 
 	glEnable(GL_BLEND);
 	glDisable(GL_DEPTH_TEST);
